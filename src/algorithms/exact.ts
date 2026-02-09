@@ -18,7 +18,7 @@
  * Para n grande ou W grande, use FPTAS ou heurísticas.
  */
 
-import { KnapsackInstance, KnapsackSolution } from '../model';
+import { KnapsackInstance, KnapsackSolution, createEmptySolution } from '../model';
 
 /**
  * Limite máximo de itens para força bruta.
@@ -51,15 +51,7 @@ export function bruteForce(instance: KnapsackInstance): KnapsackSolution {
   const { transactions, capacity } = instance;
   const n = transactions.length;
 
-  if (n === 0) {
-    return {
-      selectedTxids: [],
-      totalWeight: 0,
-      totalValue: 0,
-      txCount: 0,
-      fillRatio: 0,
-    };
-  }
+  if (n === 0) return createEmptySolution();
 
   if (n > MAX_ITEMS_BRUTE_FORCE) {
     throw new Error(
@@ -135,15 +127,7 @@ export function dynamicProgramming(instance: KnapsackInstance): KnapsackSolution
   const { transactions, capacity } = instance;
   const n = transactions.length;
 
-  if (n === 0) {
-    return {
-      selectedTxids: [],
-      totalWeight: 0,
-      totalValue: 0,
-      txCount: 0,
-      fillRatio: 0,
-    };
-  }
+  if (n === 0) return createEmptySolution();
 
   // Verifica se capacidade é razoável para DP
   if (capacity > MAX_CAPACITY_DP) {

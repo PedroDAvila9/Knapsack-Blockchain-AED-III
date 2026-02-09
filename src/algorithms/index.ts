@@ -1,7 +1,11 @@
 /**
  * Módulo de Algoritmos
  *
- * Exporta todos os algoritmos implementados para o problema da mochila.
+ * Exporta os 4 algoritmos implementados para o problema da mochila:
+ * - Guloso
+ * - Programação Dinâmica
+ * - Monte Carlo (Simulated Annealing)
+ * - FPTAS
  */
 
 export * from './greedy';
@@ -10,68 +14,45 @@ export * from './simulated-annealing';
 export * from './exact';
 
 import { KnapsackInstance, KnapsackSolution } from '../model';
-import { greedyByDensity, greedyByFee, greedy2Approx } from './greedy';
+import { greedy } from './greedy';
 import { fptas, FptasParams } from './fptas';
 import { simulatedAnnealing, SimulatedAnnealingParams } from './simulated-annealing';
+import { dynamicProgramming } from './exact';
 
 /**
  * Tipos de algoritmos disponíveis.
- *
- * - greedy-density: Guloso por densidade (sem garantia sozinho)
- * - greedy-fee: Guloso por fee absoluto (baseline, sem garantia)
- * - greedy-2approx: Guloso 2-aproximação (garantia ≥ 50% OPT)
- * - fptas: FPTAS (garantia ≥ (1-ε) OPT)
- * - sa: Simulated Annealing (heurístico/Monte Carlo)
  */
-export type AlgorithmType =
-  | 'greedy-density'
-  | 'greedy-fee'
-  | 'greedy-2approx'
-  | 'fptas'
-  | 'sa';
+export type AlgorithmType = 'greedy' | 'dp' | 'sa' | 'fptas';
 
 /**
- * Parâmetros genéricos para execução de algoritmo.
+ * Parâmetros para execução de algoritmo.
  */
 export interface AlgorithmParams {
-  /** Tipo do algoritmo */
   type: AlgorithmType;
-  /** Epsilon para FPTAS (obrigatório se type === 'fptas') */
-  epsilon?: number;
-  /** Semente para SA (obrigatório se type === 'sa') */
-  seed?: number;
-  /** Máximo de iterações para SA (opcional) */
-  maxIterations?: number;
+  epsilon?: number;      // Para FPTAS
+  seed?: number;         // Para SA
+  maxIterations?: number; // Para SA
 }
 
 /**
- * Executa o algoritmo especificado na instância.
- *
- * @param instance - Instância do problema
- * @param params - Parâmetros do algoritmo
- * @returns Solução encontrada
+ * Executa o algoritmo especificado.
  */
 export function runAlgorithm(
   instance: KnapsackInstance,
   params: AlgorithmParams
 ): KnapsackSolution {
   switch (params.type) {
-    case 'greedy-density':
-      return greedyByDensity(instance);
+    case 'greedy':
+      return greedy(instance);
 
-    case 'greedy-fee':
-      return greedyByFee(instance);
-
-    case 'greedy-2approx':
-      return greedy2Approx(instance);
+    case 'dp':
+      return dynamicProgramming(instance);
 
     case 'fptas': {
       if (params.epsilon === undefined) {
         throw new Error('Parâmetro epsilon é obrigatório para FPTAS');
       }
-      const fptasParams: FptasParams = {
-        epsilon: params.epsilon,
-      };
+      const fptasParams: FptasParams = { epsilon: params.epsilon };
       return fptas(instance, fptasParams);
     }
 
@@ -92,32 +73,24 @@ export function runAlgorithm(
 }
 
 /**
- * Retorna descrição legível do algoritmo.
+ * Descrição dos algoritmos.
  */
 export function getAlgorithmDescription(type: AlgorithmType): string {
   switch (type) {
-    case 'greedy-density':
-      return 'Guloso por Densidade (sem garantia)';
-    case 'greedy-fee':
-      return 'Guloso por Taxa (baseline)';
-    case 'greedy-2approx':
-      return 'Guloso 2-Aproximação (≥50% OPT)';
-    case 'fptas':
-      return 'FPTAS (≥(1-ε) OPT)';
+    case 'greedy':
+      return 'Guloso';
+    case 'dp':
+      return 'Programação Dinâmica (ótima)';
     case 'sa':
       return 'Simulated Annealing (Monte Carlo)';
+    case 'fptas':
+      return 'FPTAS (aproximativo)';
     default:
       return 'Desconhecido';
   }
 }
 
 /**
- * Lista todos os algoritmos disponíveis.
+ * Lista de algoritmos disponíveis.
  */
-export const AVAILABLE_ALGORITHMS: AlgorithmType[] = [
-  'greedy-density',
-  'greedy-fee',
-  'greedy-2approx',
-  'fptas',
-  'sa',
-];
+export const AVAILABLE_ALGORITHMS: AlgorithmType[] = ['greedy', 'dp', 'sa', 'fptas'];

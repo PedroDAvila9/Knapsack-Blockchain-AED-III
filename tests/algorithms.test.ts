@@ -6,12 +6,11 @@
  */
 
 import {
-  greedyByDensity,
-  greedyByFee,
-  greedy2Approx,
+  greedy,
   fptas,
   simulatedAnnealing,
   bruteForce,
+  dynamicProgramming,
 } from '../src/algorithms';
 import { KnapsackInstance, createTransaction } from '../src/model';
 
@@ -33,7 +32,7 @@ function createTestInstance(
   return { transactions, capacity };
 }
 
-describe('Algoritmo Guloso por Densidade', () => {
+describe('Algoritmo Guloso', () => {
   test('deve selecionar itens de maior densidade primeiro', () => {
     // Item 0: densidade = 10/10 = 1
     // Item 1: densidade = 20/10 = 2 (maior)
@@ -47,7 +46,7 @@ describe('Algoritmo Guloso por Densidade', () => {
       25
     );
 
-    const solution = greedyByDensity(instance);
+    const solution = greedy(instance);
 
     // Deve selecionar item 1 (densidade 2) e item 0 (densidade 1)
     // Total: peso=20, valor=30
@@ -65,95 +64,52 @@ describe('Algoritmo Guloso por Densidade', () => {
       80
     );
 
-    const solution = greedyByDensity(instance);
+    const solution = greedy(instance);
 
     expect(solution.totalWeight).toBeLessThanOrEqual(80);
   });
 
   test('deve retornar solução vazia para instância vazia', () => {
     const instance = createTestInstance([], 100);
-    const solution = greedyByDensity(instance);
+    const solution = greedy(instance);
 
     expect(solution.selectedTxids).toHaveLength(0);
     expect(solution.totalValue).toBe(0);
   });
 });
 
-describe('Algoritmo Guloso por Taxa', () => {
-  test('deve selecionar itens de maior taxa primeiro', () => {
+describe('Algoritmo Programação Dinâmica', () => {
+  test('deve encontrar solução ótima', () => {
     const instance = createTestInstance(
       [
-        { vsize: 10, fee: 100 },
-        { vsize: 10, fee: 200 }, // maior taxa
-        { vsize: 10, fee: 150 },
+        { vsize: 10, fee: 60 },
+        { vsize: 20, fee: 100 },
+        { vsize: 30, fee: 120 },
       ],
-      25
+      50
     );
 
-    const solution = greedyByFee(instance);
+    const solution = dynamicProgramming(instance);
 
-    // Deve selecionar itens com fee 200 e 150
-    expect(solution.totalValue).toBe(350);
-    expect(solution.txCount).toBe(2);
-  });
-});
-
-describe('Algoritmo Guloso 2-Aproximação', () => {
-  test('deve garantir pelo menos 50% do ótimo', () => {
-    // Caso onde greedy puro falha: item grande com alto valor
-    // Greedy por densidade pegaria vários pequenos, mas o item grande é melhor
-    const instance = createTestInstance(
-      [
-        { vsize: 10, fee: 30 },  // densidade 3
-        { vsize: 10, fee: 30 },  // densidade 3
-        { vsize: 10, fee: 30 },  // densidade 3
-        { vsize: 90, fee: 100 }, // densidade ~1.1, mas valor alto
-      ],
-      100
-    );
-
-    const exact = bruteForce(instance);
-    const approx = greedy2Approx(instance);
-
-    // Deve garantir pelo menos 50% do ótimo
-    expect(approx.totalValue).toBeGreaterThanOrEqual(exact.totalValue * 0.5);
-    expect(approx.totalWeight).toBeLessThanOrEqual(100);
+    expect(solution.totalWeight).toBeLessThanOrEqual(50);
+    expect(solution.totalValue).toBe(220); // 100 + 120
   });
 
-  test('deve escolher melhor item único quando é melhor que greedy', () => {
-    // Greedy pegaria itens pequenos (90 total), mas item grande vale mais
-    const instance = createTestInstance(
-      [
-        { vsize: 10, fee: 20 },
-        { vsize: 10, fee: 20 },
-        { vsize: 10, fee: 20 },
-        { vsize: 80, fee: 100 }, // Melhor item único
-      ],
-      100
-    );
+  test('deve retornar solução vazia para instância vazia', () => {
+    const instance = createTestInstance([], 100);
+    const solution = dynamicProgramming(instance);
 
-    const solution = greedy2Approx(instance);
-
-    // Greedy daria 60 (3x20), mas best single dá 100
-    // 2-approx deve retornar o melhor: 100 ou mais
-    expect(solution.totalValue).toBeGreaterThanOrEqual(100);
+    expect(solution.selectedTxids).toHaveLength(0);
+    expect(solution.totalValue).toBe(0);
   });
 
-  test('deve retornar greedy quando é melhor que item único', () => {
+  test('deve lançar erro para capacidade muito grande', () => {
     const instance = createTestInstance(
-      [
-        { vsize: 10, fee: 50 },
-        { vsize: 10, fee: 50 },
-        { vsize: 10, fee: 50 },
-      ],
-      30
+      [{ vsize: 10, fee: 100 }],
+      200_000 // Maior que MAX_CAPACITY_DP
     );
 
-    const solution = greedy2Approx(instance);
-
-    // Greedy dá 150 (3x50), melhor item único dá 50
-    expect(solution.totalValue).toBe(150);
-    expect(solution.txCount).toBe(3);
+    expect(() => dynamicProgramming(instance)).toThrow();
   });
 });
 
@@ -272,6 +228,17 @@ describe('Algoritmo Simulated Annealing', () => {
     expect(solution1.totalWeight).toBeLessThanOrEqual(100);
     expect(solution2.totalWeight).toBeLessThanOrEqual(100);
   });
+
+  test('deve retornar solução vazia para instância vazia', () => {
+    const instance = createTestInstance([], 100);
+    const solution = simulatedAnnealing(instance, {
+      seed: 42,
+      maxIterations: 1000,
+    });
+
+    expect(solution.selectedTxids).toHaveLength(0);
+    expect(solution.totalValue).toBe(0);
+  });
 });
 
 describe('Solução Exata (Força Bruta)', () => {
@@ -302,6 +269,14 @@ describe('Solução Exata (Força Bruta)', () => {
 
     expect(() => bruteForce(instance)).toThrow();
   });
+
+  test('deve retornar solução vazia para instância vazia', () => {
+    const instance = createTestInstance([], 100);
+    const solution = bruteForce(instance);
+
+    expect(solution.selectedTxids).toHaveLength(0);
+    expect(solution.totalValue).toBe(0);
+  });
 });
 
 describe('Comparação de Algoritmos', () => {
@@ -318,8 +293,7 @@ describe('Comparação de Algoritmos', () => {
     );
 
     const algorithms = [
-      { name: 'greedy-density', fn: () => greedyByDensity(instance) },
-      { name: 'greedy-fee', fn: () => greedyByFee(instance) },
+      { name: 'greedy', fn: () => greedy(instance) },
       {
         name: 'fptas',
         fn: () => fptas(instance, { epsilon: 0.1 }),
@@ -358,8 +332,7 @@ describe('Comparação de Algoritmos', () => {
     const exact = bruteForce(instance);
 
     const algorithms = [
-      { name: 'greedy-density', solution: greedyByDensity(instance) },
-      { name: 'greedy-fee', solution: greedyByFee(instance) },
+      { name: 'greedy', solution: greedy(instance) },
       { name: 'fptas', solution: fptas(instance, { epsilon: 0.1 }) },
       {
         name: 'sa',

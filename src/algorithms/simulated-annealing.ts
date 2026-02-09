@@ -25,9 +25,9 @@
  * "Optimization by simulated annealing." Science, 220(4598), 671-680.
  */
 
-import { Transaction, KnapsackInstance, KnapsackSolution } from '../model';
+import { Transaction, KnapsackInstance, KnapsackSolution, createEmptySolution } from '../model';
 import { RandomGenerator, createRng } from '../utils';
-import { greedyByDensity } from './greedy';
+import { greedy } from './greedy';
 
 /**
  * Parâmetros do Simulated Annealing.
@@ -85,15 +85,7 @@ export function simulatedAnnealing(
   const { transactions, capacity } = instance;
   const n = transactions.length;
 
-  if (n === 0) {
-    return {
-      selectedTxids: [],
-      totalWeight: 0,
-      totalValue: 0,
-      txCount: 0,
-      fillRatio: 0,
-    };
-  }
+  if (n === 0) return createEmptySolution();
 
   // Inicializa RNG determinístico
   const rng = createRng(params.seed);
@@ -105,14 +97,14 @@ export function simulatedAnnealing(
   const minTemp = params.minTemperature ?? 0.01;
 
   // Inicia com solução gulosa
-  const greedySolution = greedyByDensity(instance);
+  const greedySolution = greedy(instance);
   const txidToIndex = new Map<string, number>();
   transactions.forEach((tx, i) => txidToIndex.set(tx.txid, i));
 
   // Estado atual
   const current: SolutionState = {
     selected: new Set(
-      greedySolution.selectedTxids.map((txid) => txidToIndex.get(txid)!)
+      greedySolution.selectedTxids.map((txid: string) => txidToIndex.get(txid)!)
     ),
     weight: greedySolution.totalWeight,
     value: greedySolution.totalValue,

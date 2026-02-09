@@ -100,33 +100,40 @@ export function runBenchmark(
     }
 
     // Executa com medição de tempo
-    const { result: solution, elapsedMs } = timeExecution(() =>
-      runAlgorithm(instance, {
-        type: algType,
-        epsilon,
-        seed,
-        maxIterations,
-      })
-    );
+    try {
+      const { result: solution, elapsedMs } = timeExecution(() =>
+        runAlgorithm(instance, {
+          type: algType,
+          epsilon,
+          seed,
+          maxIterations,
+        })
+      );
 
-    // Valida solução
-    const validation = validateSolution(instance, solution);
-    if (!validation.valid) {
-      console.error(`ERRO: Solução inválida de ${algType}:`);
-      validation.errors.forEach((err) => console.error(`  - ${err}`));
-    }
+      // Valida solução
+      const validation = validateSolution(instance, solution);
+      if (!validation.valid) {
+        console.error(`ERRO: Solução inválida de ${algType}:`);
+        validation.errors.forEach((err) => console.error(`  - ${err}`));
+      }
 
-    const result: AlgorithmResult = {
-      algorithm: algType,
-      solution,
-      runtimeMs: elapsedMs,
-      params,
-    };
+      const result: AlgorithmResult = {
+        algorithm: algType,
+        solution,
+        runtimeMs: elapsedMs,
+        params,
+      };
 
-    results.push(result);
+      results.push(result);
 
-    if (verbose) {
-      printSolutionSummary(result, instance);
+      if (verbose) {
+        printSolutionSummary(result, instance);
+      }
+    } catch (error) {
+      if (verbose) {
+        console.log(`  ⚠ Pulando ${algType}: ${error instanceof Error ? error.message : 'erro desconhecido'}`);
+      }
+      continue;
     }
   }
 

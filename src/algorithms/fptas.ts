@@ -16,7 +16,7 @@
  * "Fast approximation algorithms for the knapsack and sum of subset problems."
  */
 
-import { KnapsackInstance, KnapsackSolution } from '../model';
+import { KnapsackInstance, KnapsackSolution, createEmptySolution } from '../model';
 
 /**
  * Parâmetros do algoritmo FPTAS.
@@ -49,16 +49,7 @@ export function fptas(
 
   const n = transactions.length;
 
-  // Caso trivial: sem transações
-  if (n === 0) {
-    return {
-      selectedTxids: [],
-      totalWeight: 0,
-      totalValue: 0,
-      txCount: 0,
-      fillRatio: 0,
-    };
-  }
+  if (n === 0) return createEmptySolution();
 
   // Passo 1: Encontra P_max (maior lucro/fee)
   let pMax = 0;
@@ -178,15 +169,7 @@ export function fptasOptimized(
 
   const n = transactions.length;
 
-  if (n === 0) {
-    return {
-      selectedTxids: [],
-      totalWeight: 0,
-      totalValue: 0,
-      txCount: 0,
-      fillRatio: 0,
-    };
-  }
+  if (n === 0) return createEmptySolution();
 
   // Encontra P_max
   let pMax = 0;

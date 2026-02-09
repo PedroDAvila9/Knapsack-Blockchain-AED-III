@@ -56,6 +56,19 @@ export interface KnapsackSolution {
 }
 
 /**
+ * Cria uma solução vazia (caso trivial: sem transações).
+ */
+export function createEmptySolution(): KnapsackSolution {
+  return {
+    selectedTxids: [],
+    totalWeight: 0,
+    totalValue: 0,
+    txCount: 0,
+    fillRatio: 0,
+  };
+}
+
+/**
  * Resultado completo de uma execução, incluindo métricas de performance.
  */
 export interface AlgorithmResult {
