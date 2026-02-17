@@ -2,7 +2,10 @@
 
 **Construtor de Blocos Bitcoin usando o Problema da Mochila 0/1**
 
-Projeto acadêmico para a disciplina de Algoritmos e Estruturas de Dados III.
+Trabalho final para a disciplina de Algoritmos e Estruturas de Dados III.
+
+Pedro Da Silva D'Ávila
+Stephan Lubke Heidmann
 
 ---
 
@@ -13,7 +16,8 @@ Projeto acadêmico para a disciplina de Algoritmos e Estruturas de Dados III.
 3. [Algoritmos Implementados](#algoritmos-implementados)
 4. [Estrutura do Projeto](#estrutura-do-projeto)
 5. [Instalação e Uso](#instalação-e-uso)
-6. [Testes](#testes)
+6. [Exemplos Práticos](#exemplos-práticos)
+7. [Testes](#testes)
 
 ---
 
@@ -41,37 +45,49 @@ Este é um problema clássico de otimização conhecido como **Problema da Mochi
 No Bitcoin, o limite é de **4.000.000 weight units**.
 Como `vbytes = weight / 4`, isso corresponde a aproximadamente **1.000.000 vbytes**.
 
+Este valor é adotado como padrão e é configurável via CLI (`--capacity`).
+
 ---
 
 ## Algoritmos Implementados
 
-O projeto implementa **4 abordagens algorítmicas** distintas:
-
 ### Tabela Comparativa
 
-| Algoritmo | Tipo | Complexidade | Garantia |
-|-----------|------|--------------|----------|
-| **Greedy** | Guloso | O(n log n) | Heurístico |
-| **DP** | Programação Dinâmica | O(n × W) | Ótimo |
-| **SA** | Monte Carlo | O(iter × n) | Heurístico |
-| **FPTAS** | Aproximativo | O(n²/ε) | ≥ (1-ε) OPT |
+| Algoritmo | Complexidade | Garantia | Descrição |
+|-----------|-------------|----------|-----------|
+| Força Bruta | O(2^n) | **Ótimo** | Apenas testes (n ≤ 25) |
+| Guloso | O(n log n) | **Sem garantia** | Ordena por fee/vsize |
+| DP Exato | O(n × W) | **Ótimo** | Pseudo-polinomial (W ≤ 100k) |
+| Simulated Annealing | O(iter × n) | Heurístico (Monte Carlo) | Meta-heurística probabilística |
+| **FPTAS** | O(n²/ε) | **≥ (1-ε) OPT** | Aproximação com garantia |
 
 ---
 
-### 1. Algoritmo Guloso (greedy)
+### 1. Força Bruta
 
-Ordena transações por densidade (`fee/vsize`) decrescente e seleciona enquanto couber.
+Enumera todos os 2^n subconjuntos. **ÓTIMO garantido**.
+
+```
+Complexidade: O(2^n) - EXPONENCIAL
+```
+
+**USO**: APENAS testes unitários com n ≤ 25.
+
+---
+### 2. Guloso (greedy-density)
+
+Ordena transações por `fee/vsize` decrescente e seleciona enquanto couber.
+
+⚠️ **IMPORTANTE**: Este algoritmo SOZINHO **não garante** 50% do ótimo!
 
 ```
 Complexidade: O(n log n)
-Garantia: Nenhuma (heurística rápida)
+Garantia: NENHUMA (apenas heurística rápida)
 ```
-
-**Uso:** Solução rápida para produção.
 
 ---
 
-### 2. Programação Dinâmica (dp)
+### 3. Programação Dinâmica (DP Exato)
 
 Algoritmo clássico de Bellman (1957). Encontra solução **ÓTIMA**.
 
@@ -79,39 +95,42 @@ Algoritmo clássico de Bellman (1957). Encontra solução **ÓTIMA**.
 Complexidade: O(n × W) - pseudo-polinomial
 ```
 
-**Limitação:** Capacidade W deve ser ≤ 100.000.
+**USO**: Instâncias pequenas para obter ótimo de referência e calcular gap das heurísticas.
 
-**Uso:** Referência para calcular gap das heurísticas.
+⚠️ **LIMITAÇÃO**: Capacidade W deve ser ≤ 100.000.
+Para W = 1.000.000 (bloco real), use FPTAS.
 
 ---
 
-### 3. Simulated Annealing (sa)
+### 4. Simulated Annealing (Monte Carlo)
 
 Meta-heurística probabilística inspirada no recozimento de metais.
 
-**Classificação:** Algoritmo Probabilístico / Monte Carlo
+**CLASSIFICAÇÃO**: Algoritmo Probabilístico / Monte Carlo
+
+Usa amostragem aleatória e aceitação probabilística (Critério de Metropolis).
 
 ```
 Algoritmo:
 1. Inicia com solução gulosa
-2. T = temperatura inicial
+2. T = temperatura inicial (alta)
 3. Enquanto T > T_min:
    a. Gera vizinho (add/remove/swap)
-   b. Aceita se melhora ou com prob = exp(Δ/T)
-   c. T = T × cooling_rate
+   b. Δ = valor_novo - valor_atual
+   c. Se Δ > 0: aceita
+      Senão: aceita com prob = exp(Δ/T)
+   d. T = T × cooling_rate
 4. Retorna melhor encontrada
 ```
 
+⚠️ **Sem garantia teórica** - heurístico
+
 ```
 Complexidade: O(iterações × n)
-Garantia: Sem garantia teórica
 ```
 
-**Uso:** Exploração do espaço de soluções. Reproduzível com seed fixo.
-
 ---
-
-### 4. FPTAS
+### 5. FPTAS ⭐
 
 **Fully Polynomial-Time Approximation Scheme**
 
@@ -121,16 +140,18 @@ Esquema de aproximação que garante solução com valor ≥ (1-ε) do ótimo.
 Algoritmo:
 1. P_max = max{fee_i}
 2. K = (ε × P_max) / n
-3. Escala valores: fee'_i = floor(fee_i / K)
+3. fee'_i = floor(fee_i / K)   // Escala valores
 4. Executa DP nos valores escalados
 5. Reconstrói solução original
 ```
 
+✅ **GARANTIA: Solução ≥ (1-ε) × OPT**
+
 | Epsilon | Garantia | Velocidade |
 |---------|----------|------------|
 | 0.01 | ≥ 99% OPT | Lento |
-| 0.10 | ≥ 90% OPT | Moderado |
-| 0.50 | ≥ 50% OPT | Rápido |
+| 0.1 | ≥ 90% OPT | Moderado |
+| 0.5 | ≥ 50% OPT | Rápido |
 
 ```
 Complexidade: O(n² / ε)
@@ -138,24 +159,25 @@ Complexidade: O(n² / ε)
 
 ---
 
+
+
+
 ## Estrutura do Projeto
 
 ```
 bitcoin-block-builder/
 ├── src/
 │   ├── algorithms/           # Algoritmos
-│   │   ├── greedy.ts            # Guloso
-│   │   ├── exact.ts             # DP + Força Bruta
+│   │   ├── greedy.ts         # Guloso
+│   │   ├── fptas.ts          # FPTAS
 │   │   ├── simulated-annealing.ts  # SA (Monte Carlo)
-│   │   └── fptas.ts             # FPTAS
+│   │   └── exact.ts          # DP + Força bruta
 │   ├── collector/            # APIs mempool.space / Blockstream
 │   ├── model/                # Tipos: Transaction, KnapsackInstance
 │   ├── evaluator/            # Métricas e benchmark
 │   ├── utils/                # RNG, timing, CSV
 │   └── cli/                  # Comandos: collect, run, benchmark
 ├── tests/                    # Testes unitários
-├── snapshots/                # Dados coletados do mempool
-├── results/                  # Resultados de benchmark
 ├── Dockerfile
 └── README.md
 ```
@@ -191,25 +213,21 @@ npm start -- collect \
 # Executar algoritmo específico
 npm start -- run \
   -i snapshots/test.json \
-  -a greedy \
-  -c 1000000
+  -a greedy-2approx \
+  -c 1000000 \
+  -o results/solucao
 
 # Executar FPTAS com ε=0.1
 npm start -- run \
   -i snapshots/test.json \
   -a fptas \
-  -e 0.1
+  -e 0.1 \
+  -c 1000000
 
-# Simulated Annealing com seed fixo
-npm start -- run \
-  -i snapshots/test.json \
-  -a sa \
-  -s 42 \
-  -m 50000
-
-# Benchmark comparativo
+# Benchmark comparativo (todos algoritmos)
 npm start -- benchmark \
   -i snapshots/test.json \
+  -c 1000000 \
   -o results/benchmark.csv
 ```
 
@@ -229,6 +247,27 @@ docker run --rm \
 
 ---
 
+## Exemplos Práticos
+
+```bash
+# 1. Coletar 3000 transações
+npm start -- collect --source mempoolspace --topN 3000 --out snapshots/exemplo.json
+
+# 2. Executar 2-aproximação (garantia ≥50%)
+npm start -- run -i snapshots/exemplo.json -a greedy-2approx
+
+# 3. Executar FPTAS com ε=0.05 (garantia ≥95%)
+npm start -- run -i snapshots/exemplo.json -a fptas -e 0.05
+
+# 4. Simulated Annealing com seed fixo
+npm start -- run -i snapshots/exemplo.json -a sa -s 42 -m 50000
+
+# 5. Comparar todos os algoritmos
+npm start -- benchmark -i snapshots/exemplo.json -o results/comparacao.csv
+```
+
+---
+
 ## Testes
 
 ```bash
@@ -236,25 +275,20 @@ npm test                 # Todos os testes
 npm run test:coverage    # Com cobertura
 ```
 
-### Cobertura
+### O que é testado
 
-- **49 testes** cobrindo todos os algoritmos
-- Validação de soluções
-- Determinismo do SA
-- Gap vs ótimo
+- **Algoritmos**: Soluções válidas, determinismo do SA, gap vs ótimo
+- **Modelos**: Validação de transações e soluções
+- **Utilitários**: PRNG Mulberry32, timing, CSV
 
 ---
 
 ## Referências
 
-- Bellman, R. (1957). *Dynamic Programming*
-- Ibarra & Kim (1975). *Fast approximation algorithms for knapsack* (FPTAS)
-- Kirkpatrick et al. (1983). *Optimization by simulated annealing*
+- Korte & Vygen, *Combinatorial Optimization*, Cap. 17 (2-aproximação)
+- Ibarra & Kim (1975), *Fast approximation algorithms for knapsack* (FPTAS)
+- Kirkpatrick et al. (1983), *Optimization by simulated annealing*
 - [mempool.space API](https://mempool.space/docs/api)
 - [Bitcoin Weight Units](https://en.bitcoin.it/wiki/Weight_units)
 
 ---
-
-## Licença
-
-Projeto acadêmico para fins educacionais.

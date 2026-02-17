@@ -19,14 +19,8 @@ import { fptas, FptasParams } from './fptas';
 import { simulatedAnnealing, SimulatedAnnealingParams } from './simulated-annealing';
 import { dynamicProgramming } from './exact';
 
-/**
- * Tipos de algoritmos disponíveis.
- */
 export type AlgorithmType = 'greedy' | 'dp' | 'sa' | 'fptas';
 
-/**
- * Parâmetros para execução de algoritmo.
- */
 export interface AlgorithmParams {
   type: AlgorithmType;
   epsilon?: number;      // Para FPTAS
@@ -34,9 +28,6 @@ export interface AlgorithmParams {
   maxIterations?: number; // Para SA
 }
 
-/**
- * Executa o algoritmo especificado.
- */
 export function runAlgorithm(
   instance: KnapsackInstance,
   params: AlgorithmParams
@@ -72,9 +63,6 @@ export function runAlgorithm(
   }
 }
 
-/**
- * Descrição dos algoritmos.
- */
 export function getAlgorithmDescription(type: AlgorithmType): string {
   switch (type) {
     case 'greedy':
@@ -90,7 +78,4 @@ export function getAlgorithmDescription(type: AlgorithmType): string {
   }
 }
 
-/**
- * Lista de algoritmos disponíveis.
- */
 export const AVAILABLE_ALGORITHMS: AlgorithmType[] = ['greedy', 'dp', 'sa', 'fptas'];

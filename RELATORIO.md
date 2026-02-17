@@ -181,10 +181,10 @@ Testes realizados com snapshot de 999 transações do mempool Bitcoin (capacidad
 
 | Algoritmo | Valor (sats) | Tempo (ms) | Transações | Gap |
 |-----------|-------------|------------|------------|-----|
-| Greedy | 144.623 | 0.15 | 828 | 0% |
-| SA (20k iter) | 144.623 | 90.26 | 828 | 0% |
+| Greedy        | 144.623 | 0.15   | 828 | 0% |
+| SA (20k iter) | 144.623 | 90.26  | 828 | 0% |
 | FPTAS (ε=0.1) | 144.396 | 103.73 | 184 | 0.16% |
-| DP* | 32.932 | 6.377 | 219 | - |
+| DP*           | 32.932  | 6.377  | 219 | - |
 
 *DP executado com capacidade reduzida (100.000 vbytes) devido a limitação de memória.
 

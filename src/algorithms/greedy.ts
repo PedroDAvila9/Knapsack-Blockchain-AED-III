@@ -8,14 +8,6 @@
 
 import { KnapsackInstance, KnapsackSolution } from '../model';
 
-/**
- * Algoritmo Guloso por Densidade.
- *
- * Ordena transações por fee/vsize decrescente e seleciona enquanto couber.
- *
- * @param instance - Instância do problema
- * @returns Solução encontrada
- */
 export function greedy(instance: KnapsackInstance): KnapsackSolution {
   const { transactions, capacity } = instance;
 
