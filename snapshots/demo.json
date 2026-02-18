@@ -4,7 +4,7 @@
     "source": "mempoolspace",
     "collectedAt": "2026-02-09T19:58:39.509Z",
     "totalMempoolSize": 20914,
-    "snapshotSize": 999
+    "snapshotSize": 1000
   },
   "transactions": [
     {
@@ -5997,6 +5997,12 @@
     },
     {
       "txid": "c54ee0754cc0826baf55346caedd57ecd5407ffaa44abcca0cb0160e47c5e001",
+      "vsize": 232,
+      "fee": 0,
+      "feeRate": 0
+    },
+    {
+      "txid": "new_tx_id_1000",
       "vsize": 232,
       "fee": 0,
       "feeRate": 0

@@ -84,11 +84,19 @@ export function fptas(
   }
 
   // Backtracking
+  const seen = new Set<number>();
   const selectedIndices: number[] = [];
   let currentProfit = bestScaledProfit;
 
   while (currentProfit > 0 && itemUsed[currentProfit] !== -1) {
-    selectedIndices.push(itemUsed[currentProfit]);
+    const idx = itemUsed[currentProfit];
+
+    if (seen.has(idx)) {
+      throw new Error(`Item ${idx} usado mais de uma vez no backtracking`);
+    }
+
+    seen.add(idx);
+    selectedIndices.push(idx);
     currentProfit = parent[currentProfit];
   }
 
