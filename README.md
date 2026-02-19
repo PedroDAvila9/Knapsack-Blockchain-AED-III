@@ -159,9 +159,6 @@ Complexidade: O(n² / ε)
 
 ---
 
-
-
-
 ## Estrutura do Projeto
 
 ```
@@ -213,7 +210,7 @@ npm start -- collect \
 # Executar algoritmo específico
 npm start -- run \
   -i snapshots/test.json \
-  -a greedy-2approx \
+  -a greedy \
   -c 1000000 \
   -o results/solucao
 
@@ -253,8 +250,8 @@ docker run --rm \
 # 1. Coletar 3000 transações
 npm start -- collect --source mempoolspace --topN 3000 --out snapshots/exemplo.json
 
-# 2. Executar 2-aproximação (garantia ≥50%)
-npm start -- run -i snapshots/exemplo.json -a greedy-2approx
+# 2. Executar Guloso
+npm start -- run -i snapshots/exemplo.json -a greedy
 
 # 3. Executar FPTAS com ε=0.05 (garantia ≥95%)
 npm start -- run -i snapshots/exemplo.json -a fptas -e 0.05
