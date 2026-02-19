@@ -1,6 +1,0 @@
-algorithm,fee_total_sats,weight_used,fill_ratio,tx_count,runtime_ms,params
-greedy-density,144623,999985,1,828,0.15,"{""type"":""greedy-density""}"
-greedy-fee,136444,999993,1,70,0.1,"{""type"":""greedy-fee""}"
-greedy-2approx,144623,999985,1,828,0.11,"{""type"":""greedy-2approx""}"
-fptas,144396,999991,1,184,100.08,"{""type"":""fptas"",""epsilon"":0.1}"
-sa,144623,999985,1,828,87.42,"{""type"":""sa"",""seed"":42,""maxIterations"":20000}"

@@ -1,4 +1,0 @@
-algorithm,fee_total_sats,weight_used,fill_ratio,tx_count,runtime_ms,params
-greedy,144623,999985,1,828,0.15,"{""type"":""greedy""}"
-sa,144623,999985,1,828,90.26,"{""type"":""sa"",""seed"":42,""maxIterations"":20000}"
-fptas,144396,999991,1,184,103.73,"{""type"":""fptas"",""epsilon"":0.1}"

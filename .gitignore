@@ -25,6 +25,6 @@ npm-debug.log*
 .env
 .env.local
 
-# Snapshots and results (optional - uncomment to ignore)
+# Snapshots and results
 # snapshots/
-# results/
+results/
